@@ -9,26 +9,27 @@
 
 格式语法 
 ```
-  "[*|#]<格式名>[数值范围][:长度][#默认值]//说明"
+  "[*|!]<格式名>[数值范围][:长度][#默认值]//说明"
 ```
 示例
 ```
 {
 	"姓名":"*string:32//用户的真实姓名",
-	"手机号":"number:16//手机号",
+	"年龄":"*int[0,100]:3#",
+	"手机号":"mobile:16//手机号",
 	"性别":"string{男|女}//性别可以不填",
 }
 ```
 
 #### 语法解释
-[*|#] 
+[*|!] 
 ```
-选项符 ，或无，表示该参数项是否必须填写， * 为必填， #根据前后文条件确定是否必填
+选项符 ,或无,表示该参数项是否必须填写, * 为必填, !根据前后文条件确定是否必填
 ```
 
 格式名
 ```
-目前所支持的格式包括: email, phone, mobile, date, time, datetime, int, float, base64, MD5 ...
+目前所支持的格式包括: email, phone, mobile, date, time, datetime, int, float, string, text,base64, MD5等
 ```
 数值范围
 ```
@@ -50,9 +51,18 @@
    参数格式的表达过于技术化，需要有给产品或业务相关人员看得懂的说明，更好的表达这些设置的目的
 ```
 
+可选格式[格式定义](format)
+```
+   int,float,string,text 基础数据格式
+   email, date, time, datetime 为限定好类型的数据格式
+   phone, mobile 为限定好类型的数据格式
+   base64, MD5 为限定好类型的数据格式
+   gender 为枚举数据类型
+```
+
 
 ### Interface Format 
-    // Format Syntax: "[*]<format_name>[data range][:length][#default_value]//COMMENT"
+    // Format Syntax: "[*|!]<format_name>[data range][:length][#default_value]//COMMENT"
 		// data range syntax:
 		// 	int float double: (1, 100), (1,100], [1,100),[1,100] 
 		//  date time: 
