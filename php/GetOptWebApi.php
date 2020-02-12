@@ -13,7 +13,7 @@ class GetOptWebApi
 			"year","month", "day","age","currency", // 数字
 			"date",	"time", "datetime", "phone","mobile", // 带格式符号的数字
 			"weekday", // 字母组合 
-			"verify","retCode", "MD5", // 字母数字组合
+			"idcard", "plateNumber","verify","retCode", "MD5", // 字母数字组合
 			"base64","email", "inlineImage",// 特定格式的字母数字符号的组合
 			"username","password", // 有格式要求和一定顺序要求的字母数字符号的组合
 			"lower","upper","letter", // 字母、数字的子集的组合
@@ -24,7 +24,6 @@ class GetOptWebApi
 
 		$this->errors = array(
 			"DATA_NOT_MATCHED" => "数据格式不匹配",
-
 			"DATA_NOT_IN_VALID_RANGE" => "数据超合理范围",
 			"DATA_NOT_IN_SET_RANGE" => "数据超出要求范围",
 			"TYPE_NO_MATCHED" => "没有匹配的类型",
@@ -49,7 +48,31 @@ class GetOptWebApi
 		// :长度,表示为需要检查的变量里原始值的字符长度
 		// 默认值，当取值失败，或者取值超范围时，以默认值做为返回值，同时发出一个错误信息
 		// 说明，参数格式的表达过于技术化，需要有给产品或业务相关人员看得懂的说明，更好的表达这些设置的目的
+		$formats = array(
+			"int"  =>"[+-]?[0-9]*", 
+			"float" =>"[+-]?[0-9]*\.[0-9]*", 
+			"double"=>"[+-]?[0-9]*\.[0-9]*", 
+			"string"=>".*", 
+			"text"  =>".*", 
+			"bool"  =>"", 
 
+			// 扩展类型
+			"year" => "[0-9]{4}",
+			"month"=> "[12][0-9]",
+			"date",	
+			"time", 
+			"datetime", 
+			"day",
+			"age",
+			"currency", // 数字
+
+			"phone","mobile", // 带格式符号的数字
+			"weekday", // 字母组合 
+			"idcard", "plateNumber","verify","retCode", "MD5", // 字母数字组合
+			"base64","email", "inlineImage",// 特定格式的字母数字符号的组合
+			"username","password", // 有格式要求和一定顺序要求的字母数字符号的组合
+			"lower","upper","letter", // 字母、数字的子集的组合
+		);
 	}
 
 	public function getAllErrors()
@@ -434,81 +457,86 @@ class GetOptWebApi
 		// data:image/png;base64,		
 	}
 
-	public function checkJSON()
+	/**
+	 * format 是格式字符串, 可以单级可以多级，
+	 */
+	public function checkFormat($format, $obj)
+	{
+		$noerror = 'No error';
+
+		$json = json_decode($format);
+
+		$str = json_last_error_msg();
+
+		if($noerror==$str)
+		{
+			$ret = $this->parseData($json, $obj);		
+			return $ret;
+		}
+		else
+			return false;
+	}
+
+	public function parseData($json, $obj)
+	{
+		if(is_array($json))
+		{
+			return $this->parseArray($json, $obj);
+		}
+
+		if(is_object($json))
+		{
+			return $this->parseObject($json, $obj);
+		}
+
+		// TODO: 能接受没有 [] {} 包裹的纯值吗?
+		return 'false';
+		return false;
+	}
+
+	public function dataType($format, $obj)
 	{
 
 	}
 
-	public function checkArray()
+	private function parseArray($format, $obj)
 	{
+		if(!is_array($obj))
+		{
+			$this->error_msg = "DATA_NOT_MATCHED";
+			return false;
+		}
 
+		if(count($format)>1)
+		{
+			// TODO: 
+			$this->error_msg = "DATA_NOT_SUPPORT_MULTIFORMAT_ARRAY";
+			return false;
+		}
+
+		foreach($obj as $v)
+		{
+			if(is_array($v))
+			{
+
+			}
+
+			if(is_object($v))
+			{
+
+			}
+
+			// is data
+			// int float string ...
+		}
+
+		return "in array";
+	}
+
+	private function parseObject()
+	{
+		return "in object";
 	}
 }
 
-function test()
-{
-	$format = "int";
-	$format = "int(100,1000]";
-	$format = "int:10";
-	$format = "int(100,1000]:17:100";
-	$format = "*int(100,1000]:17:100";
-	$ret = preg_match("/([0-9a-zA-Z]*)(([\[\(])(.*),(.*)([\)\]]))?(:([0-9]*))?/",$format, $matches);
 
-	echo '<pre>';
-	print_r($matches);
-}
-
-function main()
-{
-	$tool = new GetOptW;
-	$var  = "5460.01";
-
-	$value = $tool->getValue($var, "int(1,8000):20#100//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$value = $tool->getValue($var, "float(1,9000):20#100//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$value = $tool->getValue($var, "double(1,10000):20#100//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$var = '28';
-	$value = $tool->getValue($var, "age(1,100):20#100//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$var = '010-63233338-100';
-	$value = $tool->getValue($var, "phone//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$var = "008613800138000";
-	$value = $tool->getValue($var, "mobile:16#//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$var = "123.4123434";
-	$value = $tool->getValue($var, "currency(1,9999.99):20#100//这是注册邮箱");
-	echo $value,"<br/>";
-
-	$value = $tool->getValue($var, "date(1,100):20#100//yyyy-mm-dd yyyymmdd yyyy/mm/dd 都能接受才行");
-	$value = $tool->getValue($var, "time(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "datetime(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "year(1,100):20#100//这是注册邮箱");
-	
-	$value = $tool->getValue($var, "email(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "base64(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "MD5(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "username(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "password(1,100):20#100//这是注册邮箱");
-
-	$value = $tool->getValue($var, "lower(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "upper(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "letter(1,100):20#100//这是注册邮箱");
-	$value = $tool->getValue($var, "string(1,100):20#100//这是注册邮箱");
-	
-	if(!$value)
-		echo $tool->getLastError();
-	else
-		echo $value;
-}
-
-
-main();
