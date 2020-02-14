@@ -29,7 +29,7 @@
 
 格式名
 ```
-目前所支持的格式包括: email, phone, mobile, date, time, datetime, int, float, string, text,base64, MD5等
+目前所支持的格式包括: email, phone, mobile, date, time, datetime, int, float, string, idcard, plateNumber, text,base64, MD5等
 ```
 数值范围
 ```

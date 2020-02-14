@@ -21,7 +21,7 @@ function usage($prog)
 function parseBody($methodNo, $methodName, $lines)
 {
 	$INFOKEYS = ["No","URL","NAME","METHOD","FORMAT","REQUEST","RESPONSE","TEST","NOTE","TODO","STATUS"];
-
+	
 	$arrDatas = array(
 		"NO"=>$methodNo,
 		"NAME"=>$methodName,
@@ -33,6 +33,7 @@ function parseBody($methodNo, $methodName, $lines)
 		"STATUS"=>"",
 		"TODO"=>"",
 	);
+
 	$arrExtra = array();
 	$iskey = false;
 	$key = false;
@@ -77,22 +78,58 @@ function parseBody($methodNo, $methodName, $lines)
 		}
 	}
 
-	if($methodNo=='U18')
+	#if($methodNo=='U18')
 	{
-		print_r($arrDatas);
-		print_r($arrExtra);
-
-		$req = json_decode($arrDatas['REQUEST']);
-
-		$res = json_decode($arrDatas['RESPONSE']);
-
-		print_r(array($req, $res));
+		checkKeyValue($arrDatas, $arrExtra);
 	}
 
 	if(count($arrDatas)==0)
 		return false;
 	else
 		return $arrDatas;
+}
+
+function checkKeyValue($arrDatas, $arrExtra)
+{
+	$MUSTKEYS = ["URL","REQUEST","RESPONSE"];
+	foreach($MUSTKEYS as $v)
+	{
+		if(!isset($arrDatas[$v]))
+		{
+			// TODO: wrong
+			echo "\tKEY:",$v, " MUST BE SET\n";
+			return false;
+		}
+	}
+
+	if(''!=trim($arrDatas['REQUEST']))
+	{
+		$req = json_decode($arrDatas['REQUEST']);
+		$msg = json_last_error_msg();
+		if($msg!='No error') 
+		{
+			echo "  REQUEST: \t",$msg, "\n";
+			print_r($req);
+		}
+	}
+	else
+	{
+		// DO NOTHING
+	}
+
+	$res = json_decode($arrDatas['RESPONSE']);
+	$msg = json_last_error_msg();
+	if($msg!='No error') 
+	{
+		echo "  RESPONSE: \t",$msg, "\n";
+		print_r($res);
+	}
+
+	if(isset($arrDatas['TODO']) && ''!=$arrDatas['TODO'])
+	{
+		echo '  待完成:',$arrDatas['TODO'],"\n";
+	}
+	#print_r(array($req, $res));
 }
 
 function scanInterfaceFile($filename)
