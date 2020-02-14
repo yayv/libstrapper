@@ -41,6 +41,7 @@ function parseBody($methodNo, $methodName, $lines)
 	echo "API:",$methodNo,"[",$methodName,"]\n";
 	#print_r($lines);
 	#echo "[------------]\n";
+
 	foreach($lines as $k=>$v)
 	{
 		#echo $v,"\n";
@@ -80,7 +81,7 @@ function parseBody($methodNo, $methodName, $lines)
 
 	#if($methodNo=='U18')
 	{
-		checkKeyValue($arrDatas, $arrExtra);
+		checkKeyValue($methodName, $arrDatas, $arrExtra);
 	}
 
 	if(count($arrDatas)==0)
@@ -89,15 +90,16 @@ function parseBody($methodNo, $methodName, $lines)
 		return $arrDatas;
 }
 
-function checkKeyValue($arrDatas, $arrExtra)
+function checkKeyValue($api, $arrDatas, $arrExtra)
 {
 	$MUSTKEYS = ["URL","REQUEST","RESPONSE"];
 	foreach($MUSTKEYS as $v)
 	{
-		if(!isset($arrDatas[$v]))
+		if(!isset($arrDatas[$v]) || ""==$arrDatas[$v])
 		{
 			// TODO: wrong
-			echo "\tKEY:",$v, " MUST BE SET\n";
+			echo "\tKEY:",$v, " 必须设置\n";
+			#debug_print_backtrace();
 			return false;
 		}
 	}
@@ -147,7 +149,7 @@ function scanInterfaceFile($filename)
 	$status = 'NOT_START';
 	$currentAPI = '';
 	$currentNo  = '';
-	$data = false;
+	$data = array();
 
 	// 从 # Interface Start 行开始
 	foreach($lines as $k=>$v)
@@ -174,14 +176,16 @@ function scanInterfaceFile($filename)
 				continue;
 			}
 
+			
 			$ret = preg_match($apiTitleLine, $v, $matches);
 			if($ret)
 			{
 				// BODY 没有正常结束				
-				parseBody($currentNo, $currentAPI, $data);
+				#parseBody($currentNo, $currentAPI, $data);
 
 				$currentNo = $matches[1];
 				$currentAPI = $matches[2];
+				$data = array();
 				continue;
 			}
 
@@ -216,6 +220,10 @@ function scanInterfaceFile($filename)
 		}
 	}
 }
+
+#$options = getopt("f:hp:");
+#var_dump($options);
+#die();
 
 $infile = false;
 $argv = $_SERVER['argv'];
