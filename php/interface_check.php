@@ -136,7 +136,8 @@ function scanInterfaceFile($filename)
 {
 	// ---------------
 	$startLine = "# interface start";
-	$apiTitleLine = "/[#]+[ ]*([a-zA-Z]*[0-9]*):[ ]*(.*)/";
+	$modelTitleLine = "/##[ \t]*MODEL:[ ]*(.*)/";
+	$apiTitleLine = "/###[ \t]*([a-zA-Z]*[0-9]*):[ ]*(.*)/";
 	$apiBodyBorder = "/```/";
 	// ---------------
 
@@ -166,11 +167,19 @@ function scanInterfaceFile($filename)
 		# go on parse
 		if($start)
 		{
+			$ret = preg_match($modelTitleLine, $v, $matches);
+			if($ret)
+			{
+				echo "MODEL:",$matches[1],"\n";
+				continue;
+			}
+
 			$ret = preg_match($apiTitleLine, $v, $matches);
 			if($ret)
 			{
-				#print_r($matches);
-				#echo $matches[1],' ',$matches[2],"\n";
+				// BODY 没有正常结束				
+				parseBody($currentNo, $currentAPI, $data);
+
 				$currentNo = $matches[1];
 				$currentAPI = $matches[2];
 				continue;
