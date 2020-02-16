@@ -1,11 +1,5 @@
-### 这个项目是做什么的？
-这个项目是对一套接口标准的格式检查
 
-### 这个项目包含什么？
-
-### 如何使用这个项目？
-
-#### 接口标准的说明
+本文件描述的格式为 WEB API 接口中，对值的描述方式
 
 格式语法 
 ```
@@ -24,12 +18,13 @@
 #### 语法解释
 [*|!] 
 ```
-选项符 ,或无,表示该参数项是否必须填写, * 为必填, !根据前后文条件确定是否必填
+选项符 ,或无,表示该参数项是否必须填写, * 为必填, !根据前后文条件确定是否必填, 具体条件需要在具体情境下具体描述, 本格式约定无法给出更多参考
 ```
 
 格式名
 ```
-目前所支持的格式包括: email, phone, mobile, date, time, datetime, int, float, string, idcard, plateNumber, text,base64, MD5等
+基础数据格式包括: int, float, date, time, datetime, string, text
+扩展数据格式包括: email, phone, mobile, idcard, plateNumber, text,base64, MD5等
 ```
 数值范围
 ```
@@ -38,7 +33,7 @@
 
 长度
 ```
-   表示为需要检查的变量里原始值的字符长度
+   表示为需要检查的变量里原始值的字符串长度
 ```
 
 默认值
@@ -52,12 +47,14 @@
 ```
 
 可选格式[格式定义](format)
+
 ```
-   int,float,string,text 基础数据格式
+   基础数据格式: int,float,date,time,datetime,string,text 
+   扩展格式及其定义:
    email, date, time, datetime 为限定好类型的数据格式
    phone, mobile 为限定好类型的数据格式
    base64, MD5 为限定好类型的数据格式
-   gender 为枚举数据类型
+   gender: "string{男,女}"
 ```
 
 

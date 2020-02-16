@@ -59,11 +59,11 @@ class GetOptWebApi
 			// 扩展类型
 			"year" => "[0-9]{4}",
 			"month"=> "[12][0-9]",
-			"date",	
-			"time", 
-			"datetime", 
-			"day",
-			"age",
+			"date"=>"[0-9]{4}[-/ ]?[0-9]{2}[-/ ]?[0-9]{2}",	
+			"time"=>"[0-9]{2}:[0-9]{2}:[0-9]{2}", 
+			"datetime"=>"", 
+			"weekday"=>"(Sun|Mon|Tue|Sat)",
+			"age"=>"[0-9]{3}",
 			"currency", // 数字
 
 			"phone","mobile", // 带格式符号的数字
