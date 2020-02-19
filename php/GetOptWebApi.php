@@ -1,10 +1,16 @@
 <?php
 ini_set("display_errors","on");
 
-class GetOptWebApi
+class GetOptW
 {
 	public function __construct()
 	{
+		$this->callStack = [];
+
+		$this->format = false ;
+
+		$this->last_error = false ;
+
 		$this->types = array(
 			// 基础数据类型
 			"int", "float", "double", "string","text","bool",
@@ -23,9 +29,16 @@ class GetOptWebApi
 		// TODO: float", "double", "age",			"date",	"time", "datetime","year","phone","mobile", "base64","MD5","username","password","lower","upper","letter","string",
 
 		$this->errors = array(
+			// 格式解析错误，或格式内的值有错
+			"FORMAT_SYNTAX_ERROR" => "格式描述的语法错误",
+
+			// 参数部分错误，或参数数据错误
 			"DATA_NOT_MATCHED" => "数据格式不匹配",
 			"DATA_NOT_IN_VALID_RANGE" => "数据超合理范围",
 			"DATA_NOT_IN_SET_RANGE" => "数据超出要求范围",
+			"DATA_NOT_EXIST" => "KEY不存在",
+
+			// 解析过程中，格式与数据匹配问题
 			"TYPE_NO_MATCHED" => "没有匹配的类型",
 			"TYPE_WITHOUT_METHOD" => "没有匹配的解析方法",
 		);
@@ -95,22 +108,26 @@ class GetOptWebApi
 	{
 		$ret = preg_match("/([\*|#])?([0-9a-zA-Z@]*)(([\{\[\(])(.*)([\)\]\}]))?(:([0-9]*))?(#([^\/]*))?(\/\/(.*))?/",$format, $matches);
 		if($ret)
-		{
+		{#print_r($matches);die();
 			$format_result = array(
-				"option"	=>$matches[1],
+				"option"	=>isset($matches[1])?$matches[1]:'',
 				"name"		=>$matches[2],
-				"left"		=>$matches[4],
-				"range"		=>$matches[5],	
-				"right"		=>$matches[6],
-				"length"	=>$matches[8],
-				"default"	=>$matches[10],
-				"comment"	=>$matches[12]);
+				"left"		=>isset($matches[4])?$matches[4]:'',
+				"range"		=>isset($matches[5])?$matches[5]:'',	
+				"right"		=>isset($matches[6])?$matches[6]:'',
+				"length"	=>isset($matches[8])?$matches[8]:'',
+				"default"	=>isset($matches[10])?$matches[10]:'',
+				"comment"	=>isset($matches[12])?$matches[12]:''
+			);
 		}
 
 		return $format_result;
 	}
 
-	public function getValue($var, $format)
+	/**
+	 * 用 format 格式检查 $var 变量是否符合规范, 并将可能的数值通过 $result 返回
+	 */
+	public function checkValue( $format, $var, &$result )
 	{
 		$f = $this->getFormat($format);
 
@@ -120,7 +137,8 @@ class GetOptWebApi
 		{
 			$this->last_error = $this->errors['TYPE_NO_MATCHED'];
 			$this->all_errors[] = $this->last_error ;
-			return false; 
+			$result = false ;
+			return false ; 
 		}
 
 		if(method_exists($this,'CHECK'.$f['name']))
@@ -132,6 +150,7 @@ class GetOptWebApi
 		{
 			$this->last_error = $this->errors['TYPE_WITHOUT_METHOD'];
 			$this->all_errors[] = $this->last_error ;
+			$result = false ;
 			return false; 
 		}
 	}
@@ -209,7 +228,7 @@ class GetOptWebApi
 			}
 			else
 			{
-				if($mathes[0]=='' && $format['default']!='')
+				if($matches[0]=='' && $format['default']!='')
 					$result = intval($format['default']);
 				else if($matches[0]=='' && $format['default']=='')
 					$result = false;
@@ -457,63 +476,101 @@ class GetOptWebApi
 		// data:image/png;base64,		
 	}
 
-	/**
-	 * format 是格式字符串, 可以单级可以多级，
-	 */
-	public function checkFormat($format, $obj)
+	public function isValidateJSONString($strJSON)
 	{
-		$noerror = 'No error';
+		$json = json_decode($strJSON);
+		$err  = json_last_error_msg();
 
-		$json = json_decode($format);
-
-		$str = json_last_error_msg();
-
-		if($noerror==$str)
+		if('No error'==$err)
 		{
-			$ret = $this->parseData($json, $obj);		
-			return $ret;
+			return $json;
 		}
 		else
 			return false;
 	}
 
-	public function parseData($json, $obj)
+	// 解析基础数据类型
+	private function parseData($jsonFormat, $jsonObject)
 	{
-		if(is_array($json))
-		{
-			return $this->parseArray($json, $obj);
-		}
+		$arrFormat = $this->getFormat($jsonFormat);
 
-		if(is_object($json))
+		#print_r(array($arrFormat,$jsonObject));die('断路施工。。。');
+		if('*'==$arrFormat['option'] && $jsonObject!=false)
 		{
-			return $this->parseObject($json, $obj);
+			return true;
 		}
+		else if(''==$arrFormat['option'] && $jsonObject==false)
+		{
+			return true;
+		}
+		else
+		{
+			$callstack = implode('->',$this->callStack);
+			$this->last_error = $callstack.':'.$this->errors['DATA_NOT_EXIST'];
+			$this->all_errors[] = $this->last_error ;
 
-		// TODO: 能接受没有 [] {} 包裹的纯值吗?
-		return 'false';
-		return false;
+			return false;
+		}
+		/*
+		// TODO: 完成对基础数据类型的解析
+		$ret = $this->checkValue( $v, isset($jsonObject->$k)?$jsonObject->$k:false, $value );
+
+		// 传入值符合要求, 则返回true;传入值不能检测通过则返回false
+		if($ret)
+		{
+			// TODO: 对数值匹配结果进行处理
+		}
+		*/
 	}
 
-	public function dataType($format, $obj)
+	// 解析数组格式
+	private function parseArray($jsonFormat, $jsonObject)
 	{
-
-	}
-
-	private function parseArray($format, $obj)
-	{
-		if(!is_array($obj))
+		$result = [];
+		if(!is_array($jsonObject))
 		{
 			$this->error_msg = "DATA_NOT_MATCHED";
 			return false;
 		}
 
-		if(count($format)>1)
+		if(count($jsonFormat)>1)
 		{
 			// TODO: 
 			$this->error_msg = "DATA_NOT_SUPPORT_MULTIFORMAT_ARRAY";
 			return false;
 		}
 
+		foreach($jsonFormat as $k=>$v)
+		{
+			// 根据格式,依次检查Obj
+			if(is_array($jsonFormat[0]))
+			{
+				// TODO: 向下一层继续解析
+				#$this->parse
+			}
+			else if(is_object($jsonFormat[0]))
+			{
+
+			}
+			else if(is_string($jsonFormat[0]))
+			{
+				// TODO:解析格式, 检查参数的值是否匹配
+				foreach($jsonObject as $kk=>$vv)
+				{
+					$this->callStack[] = "KEY $k";
+					$value = $this->parseData($jsonFormat[0], $vv);
+					array_pop($this->callStack[]);
+				}
+			}
+			else
+			{
+				// 不是对象,不是数组,不是字符串,那格式出错了
+				$this->last_error = $this->errors['FORMAT_SYNTAX_ERROR'];
+				$this->all_errors[] = $this->last_error ;
+				return false;
+			}
+		}
+/*
 		foreach($obj as $v)
 		{
 			if(is_array($v))
@@ -529,14 +586,169 @@ class GetOptWebApi
 			// is data
 			// int float string ...
 		}
-
-		return "in array";
+*/
+		die("这里是断路施工中...\n");
+		return $result;
 	}
 
-	private function parseObject()
+	// 解析对象格式
+	private function parseObject($jsonFormat, $jsonObject)
 	{
-		return "in object";
+		$result = new stdClass();
+
+		if(!is_object($jsonObject))
+		{
+			$this->error_msg = "DATA_NOT_MATCHED";
+			$this->last_error = "DATA_NOT_MATCHED";
+			$this->all_errors[] = $this->error_msg;
+			return false;
+		}
+
+		if(count($jsonFormat)>1)
+		{
+			// TODO: 
+			$this->error_msg = "DATA_NOT_SUPPORT_MULTIFORMAT_ARRAY";
+			return false;
+		}
+
+		// obj 模式下, $format 内的 key 的个数应该大于等于 $obj 内 key 的个数
+		foreach($jsonFormat as $k=>$v)
+		{
+			$value = '';
+			if(is_array($v))
+			{
+				if(!isset($jsonObject->$k))
+				{
+					$this->last_error = $this->errors['FORMAT_SYNTAX_ERROR'];
+					$this->all_errors[] = $this->last_error ;
+					return $result;
+				}
+
+				$this->callStack[] = '(Array)';
+				$this->parseArray( $v, $jsonObject->$k );
+				array_pop($this->callStack);
+			}
+			else if(is_object($v))
+			{
+				if(!isset($jsonObject->$k))
+				{
+					$this->last_error = $this->errors['FORMAT_SYNTAX_ERROR'];
+					$this->all_errors[] = $this->last_error ;
+					return $result;
+				}
+
+				$this->callStack[] = "(Object)$k";
+				$this->parseObject( $v, $jsonObject->$k );
+				array_pop($this->callStack);
+			}
+			else 
+			{
+				$this->callStack[] = "(Data)$k";
+				$this->parseData( $v, isset($jsonObject->$k)?$jsonObject->$k:false );
+				array_pop($this->callStack);
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * format 是格式字符串, 可以单级可以多级，
+	 */
+	public function isFormatOK($format)
+	{
+		$noerror = 'No error';
+
+		$json = json_decode($format);
+
+		$str = json_last_error_msg();
+
+		// 目前的检查, 只能判断为符合json语法，尚未能判断是否
+		if($noerror==$str)
+		{
+			// 保存接口格式
+			$this->format = $json;
+
+			// TODO: 按照参数接口格式进行检查
+			#$ret = $this->parseData($json, $obj);
+
+			return true; //$ret;
+		}
+		else
+		{
+			$this->last_error = 'FORMAT_SYNTAX_ERROR';
+			$this->all_errors[] = $this->last_error;
+			return false;
+		}
+	}
+
+	// 用检查过的格式字符串从参数表中获取参数
+	public function parseParams($objParams)
+	{
+		if(is_array($this->format))
+		{
+			$this->callStack = [];
+			$this->callStack[] = 'Array';
+			return $this->parseArray($this->format, $objParams);
+		}
+
+		if(is_object($this->format))
+		{
+			$this->callStack = [];
+			$this->callStack[] = 'Object';
+			return $this->parseObject($this->format, $objParams);
+		}
+
+		// TODO: 能接受没有 [] {} 包裹的纯值吗? 暂定为不能支持吧
+		return false;
+	}
+
+	public function matchFormatAndParams($format, $params, $type='json')
+	{
+
 	}
 }
 
+function _test()
+{
+	$format = "int";
+	$format = "int(100,1000]";
+	$format = "int:10";
+	$format = "int(100,1000]:17:100";
+	$format = "*int(100,1000]:17:100";
 
+	$tool = new GetOptW;
+	$var  = "5460";
+
+	$value = false;
+	$ret   = $tool->checkValue($format, $var, $value);
+	
+	if(!$value)
+		echo $tool->getLastError();
+	else
+		echo $value;
+}
+
+function _testJSON()
+{
+	$format = '{"userId":"*int",   "reg":{"mobile":"*int","name":"string"}}';
+	$string = '{"userId":"asdfsdf","reg":{"mobile":13811382543}}';
+
+	$t = new GetOptW();
+
+	$json = json_decode($string);
+
+	if($t->isFormatOK($format))
+	{
+		$result = $t->parseParams($json);	
+		if( count($t->all_errors)<1 )
+			print_r($json);
+		else
+			print_r($t->all_errors);
+	}
+	else
+	{
+		echo 'Format String Error';
+	}
+
+	
+}
