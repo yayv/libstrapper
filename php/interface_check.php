@@ -14,7 +14,9 @@ $status = [
 
 function usage($prog)
 {
-	echo "usage: $prog <interface_file.md>\n";
+	echo "usage: \n";
+	echo "\t$prog <interface_file.md>\n";
+	echo "\t$prog <interface_file.md> [-t template_file [-o output_file]]\n"
 	return ;
 }
 
@@ -36,8 +38,9 @@ function parseBody($methodNo, $methodName, $lines)
 
 	$arrExtra = array();
 	$iskey = false;
-	$key = false;
+	$key = false;	
 
+	if($methodNo=='') {print_r(array($methodNo,$methodName,$lines));die('kii');}
 	echo "API:",$methodNo,"[",$methodName,"]\n";
 	#print_r($lines);
 	#echo "[------------]\n";
@@ -137,7 +140,7 @@ function checkKeyValue($api, $arrDatas, $arrExtra)
 function scanInterfaceFile($filename)
 {
 	// ---------------
-	$startLine = "# interface start";
+	$startLine = "# Interface Start";
 	$modelTitleLine = "/##[ \t]*MODEL:[ ]*(.*)/";
 	$apiTitleLine = "/###[ \t]*([a-zA-Z]*[0-9]*):[ ]*(.*)/";
 	$apiBodyBorder = "/```/";
@@ -156,7 +159,7 @@ function scanInterfaceFile($filename)
 	{
 		if(!$start)
 		{
-			if( 0==strpos( trim($v), $startLine) )
+			if( 0===strpos( trim($v), $startLine) )
 			{
 				$start = true ;
 				$status = 'API_START';
@@ -169,25 +172,7 @@ function scanInterfaceFile($filename)
 		# go on parse
 		if($start)
 		{
-			$ret = preg_match($modelTitleLine, $v, $matches);
-			if($ret)
-			{
-				echo "MODEL:",$matches[1],"\n";
-				continue;
-			}
-
-			
-			$ret = preg_match($apiTitleLine, $v, $matches);
-			if($ret)
-			{
-				// BODY 没有正常结束				
-				#parseBody($currentNo, $currentAPI, $data);
-
-				$currentNo = $matches[1];
-				$currentAPI = $matches[2];
-				$data = array();
-				continue;
-			}
+			#echo $k,$v,"\n";
 
 			if($status=='IN_DATA')
 			{
@@ -208,6 +193,26 @@ function scanInterfaceFile($filename)
 			}
 			else //($status!='IN_DATA')
 			{
+				$ret = preg_match($modelTitleLine, $v, $matches);
+				if($ret)
+				{
+					echo "MODEL:",$matches[1],"\n";
+					continue;
+				}
+
+				
+				$ret = preg_match($apiTitleLine, $v, $matches);
+				if($ret)
+				{
+					// BODY 没有正常结束				
+					#parseBody($currentNo, $currentAPI, $data);
+
+					$currentNo = $matches[1];
+					$currentAPI = $matches[2];
+					$data = array();
+					continue;
+				}
+
 				$ret = preg_match($apiBodyBorder, $v, $matches);
 				if($ret)
 				{
@@ -218,6 +223,34 @@ function scanInterfaceFile($filename)
 				}
 			}
 		}
+	}
+}
+
+function printAPI($API, $template, $outfile=false)
+{
+	$f = false;
+	if($outfile!=false)
+	{
+		$f = fopen($outfile);
+	}
+
+	if($f)
+	{
+		ob_start();
+	}
+
+	
+
+	if($f)
+	{
+		ob_end_clean();
+		$c = ob_get_contents();
+		fwrite($f, $c);
+	}
+
+	if($f)
+	{
+		fclose($f);
 	}
 }
 

@@ -54,16 +54,16 @@ XML格式的参数传递方式，不在本格式的讨论范围之内。
 			"carColor":"*string",
 			"status":"*string",
 			"mileage":"*float//里程表示数,保留小数点后2位",
-	    "rechargeMileage":"500000000//车辆续航里程",
-	    "batteryCapacity":"非必填 //电池容量",
-	    "gasTankCapacity":"非必填//油箱容量",
-	    "insuranceDate":"*date//保险到期日期",
-	    "annualSurveyDate":"*date//年检到期日期",
-	    "carCareDate":"*date//预估下一次保养日期",
-	    "drivingLicenseNo":"*string//行驶证号",
-	    "extraDatas":{
-	    		"!string":"*string//扩展的 key-value 组合"
-	    	}
+		    "rechargeMileage":"500000000//车辆续航里程",
+		    "batteryCapacity":"非必填 //电池容量",
+		    "gasTankCapacity":"非必填//油箱容量",
+		    "insuranceDate":"*date//保险到期日期",
+		    "annualSurveyDate":"*date//年检到期日期",
+		    "carCareDate":"*date//预估下一次保养日期",
+		    "drivingLicenseNo":"*string//行驶证号",
+		    "extraDatas":{
+		    		"!string":"*string//扩展的 key-value 组合"
+		    	}
 		}
 	}
 
