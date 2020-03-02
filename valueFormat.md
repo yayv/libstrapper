@@ -23,8 +23,17 @@
 
 格式名
 ```
-基础数据格式包括: int, float, date, time, datetime, string, text
-扩展数据格式包括: email, phone, mobile, idcard, plateNumber, text,base64, MD5等
+基础数据格式包括: int, float, date, time, datetime, string, text, bool
+扩展数据格式包括: 
+  数字类型的扩展:   "year","month", "day","age","currency"
+  时间日期型扩展:    "date", "time", "datetime"
+  带格式或符号的数字: "phone","mobile"
+  有特殊含义常见字母组合: "weekday"
+  对字符有一定约束:    "lower","upper","letter"
+  编码格式:         "idcard", "plateNumber","verify","retCode", "MD5","base64","email", "inlineImage"
+  或许可是实现的扩展: "username","password", // 有格式要求和一定顺序要求的字母数字符号的组合
+
+  __email, phone, mobile, idcard, plateNumber, text,base64, MD5等__
 ```
 数值范围
 ```

@@ -15,8 +15,9 @@ $status = [
 function usage($prog)
 {
 	echo "usage: \n";
+	echo "\t$prog <interface_format_file> <template_file> <output_file>\n";
+	#echo "\t$prog -f <interface_format_file> -t <template_file> -o <output_file>\n";
 	echo "\t$prog <interface_file.md>\n";
-	echo "\t$prog <interface_file.md> [-t template_file [-o output_file]]\n"
 	return ;
 }
 
@@ -153,6 +154,7 @@ function scanInterfaceFile($filename)
 	$currentAPI = '';
 	$currentNo  = '';
 	$data = array();
+	$apis = array();
 
 	// 从 # Interface Start 行开始
 	foreach($lines as $k=>$v)
@@ -183,7 +185,7 @@ function scanInterfaceFile($filename)
 					// call parse data
 					$data[] = $v;
 					$status = "BODY_END";
-					parseBody($currentNo, $currentAPI, $data);
+					$apis[] = parseBody($currentNo, $currentAPI, $data);
 					continue ;
 				}
 				else
@@ -224,6 +226,8 @@ function scanInterfaceFile($filename)
 			}
 		}
 	}
+
+	return $apis;
 }
 
 function printAPI($API, $template, $outfile=false)
@@ -239,7 +243,7 @@ function printAPI($API, $template, $outfile=false)
 		ob_start();
 	}
 
-	
+
 
 	if($f)
 	{
@@ -254,20 +258,45 @@ function printAPI($API, $template, $outfile=false)
 	}
 }
 
-#$options = getopt("f:hp:");
-#var_dump($options);
-#die();
+function main()
+{
+	/*
+	$args = getopt("f:t:o:");
+	*/
+	$argv 		= $_SERVER['argv'];
+	$formatFile = isset($argv[1])?$argv[1]:"";
+	$templateFile = isset($argv[2])?$argv[2]:"";
+	$outputFile = isset($argv[3])?$argv[3]:"";
 
-$infile = false;
-$argv = $_SERVER['argv'];
+	if( !is_file($formatFile) || !is_file($templateFile) )
+	{
+		usage($_SERVER['argv'][0]);
+		return ;
+	}
 
-if(count($argv)>1) {
-	$infile = $argv[1];
+	if($formatFile && is_file($formatFile))
+	{
+		$apis = scanInterfaceFile($formatFile);
+
+		$dump = array();
+		foreach($apis as $k=>$v)
+		{
+			$dump[$v['URL']] = $v['REQUEST'];
+		}
+
+		print_r($dump);
+		return ;
+	}
+	else if($formatFile)
+	{
+		echo 'Filename:',$formatFile," is not a validate file\n";
+	}
+	else
+	{
+		usage($_SERVER['argv'][0]);
+	}
+
+	echo "\n";
 }
 
-if($infile)
-	scanInterfaceFile($infile);
-else
-	showUsage($_SERVER['argv'][0]);
-
-echo "\n";
+main();

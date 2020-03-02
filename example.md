@@ -9,6 +9,7 @@
 ```
 NO: User01
 NAME: 用户登录
+URL: /user/login
 NOTE: 这里的接口定义只是一个示范，登录信息完全用明文传输在安全上有点弱
 FORMAT:JSON
 METHOD:POST
@@ -23,7 +24,7 @@ RESPONSE:
 	"code":"*retCode",
 	"data":{
 			"name":"*string//用户显示名",
-			"score":"*int//用户积分",
+			"score":"*int//用户积分"
 		},
 	"message":"!string//错误消息，如登录是失败原因之类"
 }
@@ -33,6 +34,7 @@ RESPONSE:
 ```
 NO: User02
 NAME: 用户退出登录
+URL:/user/logout
 NOTE: 这里的接口定义只是一个示范，登录信息完全用明文传输在安全上有点弱
 FORMAT:JSON
 METHOD:GET/POST
@@ -42,7 +44,7 @@ RESPONSE:
 	"code":"*retCode",
 	"data":{
 			"name":"*string//用户显示名",
-			"score":"*int//用户积分",
+			"score":"*int//用户积分"
 		},
 	"message":"!string//错误消息，如登录是失败原因之类"
 }
@@ -52,6 +54,7 @@ RESPONSE:
 ```
 NO: User03
 NAME: 获取图形验证码
+URL:/user/getVerify
 NOTE: 这里的接口定义只是一个示范，登录信息完全用明文传输在安全上有点弱
 FORMAT:JSON
 METHOD:POST
@@ -60,7 +63,7 @@ RESPONSE:
 {
 	"code":"*retCode",
 	"data":{
-			"image":"*inlineImage//数据流内的图片",
+			"image":"*inlineImage//数据流内的图片"
 		},
 	"message":"!string//错误消息，如登录是失败原因之类,此项为可选项，浏览器端读取接口时需注意"
 }
