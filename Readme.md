@@ -21,4 +21,5 @@
 
 [API文件结构标准](fileFormat.md)
 
+[API文件示例](example.md)
 
