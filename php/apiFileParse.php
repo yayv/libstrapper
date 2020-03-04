@@ -243,8 +243,6 @@ function printAPI($API, $template, $outfile=false)
 		ob_start();
 	}
 
-
-
 	if($f)
 	{
 		ob_end_clean();
@@ -278,13 +276,12 @@ function main()
 	{
 		$apis = scanInterfaceFile($formatFile);
 
-		$dump = array();
-		foreach($apis as $k=>$v)
-		{
-			$dump[$v['URL']] = $v['REQUEST'];
-		}
+		#print_r($apis);
 
-		print_r($dump);
+		
+
+		var_export($apis);
+
 		return ;
 	}
 	else if($formatFile)
@@ -300,3 +297,4 @@ function main()
 }
 
 main();
+
