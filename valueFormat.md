@@ -11,12 +11,14 @@
 数组:
 对于值为 数组 [] 的情况, 因为值为数组所以，数组长度及当前参数是否必选就无法在值的格式里进行描述了。因此
 ```
-  {"*[n,3]fruits":["string//fruit name, 这里的 key 表示本fruits参数为必填，且数组长度在1-3之间"]}
+  {"*[n]fruits":["string//fruit name, 这里的 key 表示本fruits参数为必填，且数组长度为n"]}
+  {"*[4,9]fruits":["string//fruit name, 这里的 key 表示本fruits参数为必填，且数组长度在4-9之间"]}
+  {"[0,9]fruits":["string//fruit name, 这里的 key 表示本fruits参数为非必填，且数组长度在0-9之间"]}
 ```
 
 字典:
 ```
-  "*keyname":{"fruit":"string//fruit name, 这里的 key 表示本fruits参数为必填，且数组长度在1-3之间"}
+  "*keyname":{"fruit":"string//fruit name, 这里的 key 表示本 keyname 参数为必填，且数组长度在1-3之间"}
 ```
 
 特殊的key:
