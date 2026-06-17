@@ -86,6 +86,8 @@
    phone, mobile 为限定好类型的数据格式
    base64, MD5 为限定好类型的数据格式
    gender: "string{男,女}"
+
+   未来可以按照 IANA JWT 公开字段名进行实现
 ```
 
 
