@@ -77,7 +77,7 @@
    参数格式的表达过于技术化，需要有给产品或业务相关人员看得懂的说明，更好的表达这些设置的目的
 ```
 
-可选格式[格式定义](format)
+可选格式[格式定义](/extraFormats.md)
 
 ```
    基础数据格式: int,float,date,time,datetime,string,text 

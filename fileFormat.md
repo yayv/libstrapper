@@ -36,13 +36,13 @@
   ```
   CODE: 同标题的<接口编号>
   NAME: 同标题的<接口名>
-  URL: 必写
+  URL: 必写，
   METHOD: POST/GET...
   FORMAT: JSON/FORM
   NOTE:
   TODO:
-  REQUEST: 统一用json格式表示, 必须有,值可以为空白
-  RESPONSE: 必须有内容
+  REQUEST: 统一用 [dataStruct](./dataStruct.md) 格式表示, 必须有,值可以为空白
+  RESPONSE: 必须有内容, 使用 [dataFormat](./dataStruct.md) 格式表示
   STATUS:
   LASTMODIFY: 最后修改日期,用于判断本接口是否有更新
   ```
